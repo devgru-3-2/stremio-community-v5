@@ -41,6 +41,8 @@ set(SOURCES
         src/core/globals.cpp
         src/utils/helpers.h
         src/utils/helpers.cpp
+        src/utils/profiles.h
+        src/utils/profiles.cpp
         src/utils/config.h
         src/utils/config.cpp
         src/utils/crashlog.h
