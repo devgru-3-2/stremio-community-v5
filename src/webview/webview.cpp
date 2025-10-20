@@ -160,6 +160,34 @@ img.addEventListener('error', function() {
 })();
 )JS";
 
+// Minimal kids-mode UI safeguards: hide torrent/magnet entry points and similar risky controls
+static const wchar_t* INJECTED_KIDS_MODE_JS = LR"JS(
+(function(){
+  if (window.top !== window) return;
+  function hideRisk() {
+    try {
+      // Heuristics: hide buttons/links whose text suggests torrent/magnet/open file
+      const riskyTexts = [
+        'Parse Torrent', 'Open Torrent', 'Magnet', 'Add Magnet', 'Open File', 'Local File'
+      ];
+      const nodes = document.querySelectorAll('a,button,[role="button"]');
+      nodes.forEach((el)=>{
+        const t = (el.textContent||'').trim().toLowerCase();
+        for (const k of riskyTexts) {
+          if (t.includes(k.toLowerCase())) { el.style.display='none'; break; }
+        }
+      });
+      // Also hide obvious upload inputs
+      document.querySelectorAll('input[type="file"]').forEach((el)=>{ el.style.display='none'; });
+    } catch(e) { /* noop */ }
+  }
+  hideRisk();
+  document.addEventListener('DOMContentLoaded', hideRisk, { once:false });
+  const mo = new MutationObserver(hideRisk);
+  mo.observe(document.documentElement||document.body, { subtree:true, childList:true });
+})();
+)JS";
+
 void WaitAndRefreshIfNeeded()
 {
     std::thread([](){
@@ -288,6 +316,9 @@ void InitWebView2(HWND hWnd)
 
                     g_webview->AddScriptToExecuteOnDocumentCreated(EXEC_SHELL_SCRIPT,nullptr);
                     g_webview->AddScriptToExecuteOnDocumentCreated(INJECTED_KEYDOWN_SCRIPT,nullptr);
+                    if (g_isKidsProfile) {
+                        g_webview->AddScriptToExecuteOnDocumentCreated(INJECTED_KIDS_MODE_JS,nullptr);
+                    }
 
                     SetupWebMods();
 
