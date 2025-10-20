@@ -35,6 +35,12 @@ bool SaveProfiles(const ProfilesDoc &doc);
 // Returns absolute directory path; ensures it exists
 std::wstring EnsureProfileDataDir(const std::string &id);
 
+// Security helpers (PBKDF2-HMAC-SHA256 via OpenSSL)
+std::string GenerateSaltHex(std::size_t numBytes = 16);
+std::string DerivePBKDF2_SHA256(const std::string &pinUtf8, const std::string &saltHex, int iterations = 150000, std::size_t dkLen = 32);
+bool VerifyPin(const ProfileMeta &meta, const std::string &pinUtf8);
+void SetPin(ProfileMeta &meta, const std::string &pinUtf8, int iterations = 150000);
+
 #endif // PROFILES_H
 
 

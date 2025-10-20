@@ -63,6 +63,7 @@ int             g_hoverIndex = -1;
 HFONT           g_hMenuFont = nullptr;
 HANDLE          g_serverJob  = nullptr;
 HWND            g_trayHwnd   = nullptr;
+bool            g_isKidsProfile = false;
 
 // Ini Settings
 bool g_pauseOnMinimize   = true;

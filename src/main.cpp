@@ -169,6 +169,7 @@ int main(int argc, char *argv[]) {
     const ProfileMeta &active = doc.profiles.front();
     std::wstring base = GetExeDirectory();
     g_userDataFolder = std::filesystem::path(base) / L"portable_config" / Utf8ToWstring(active.userDataDir);
+    g_isKidsProfile = active.kids;
   }
 
   // node

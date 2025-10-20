@@ -511,12 +511,20 @@ static void SetupWebMessageHandler()
                         std::string decodedFilePathUtf8 = decodeURIComponent(utf8FilePath);
                         std::string baseName = std::filesystem::path(decodedFilePathUtf8).filename().string();
                         if (isSubtitle(filePath)) {
+                            if (g_isKidsProfile) {
+                                // Block external subtitle drops in kids mode
+                                return S_OK;
+                            }
                             std::vector<std::string> subaddArgs = {"sub-add",decodedFilePathUtf8, "select", baseName + " External", "Other Tracks"};
                             HandleEvent("mpv-command", subaddArgs);
                             json j;
                             j["type"] = "SubtitleDropped";
                             j["path"] = utf8FilePath;
                             SendToJS("SubtitleDropped", j);
+                            return S_OK;
+                        }
+                        if (g_isKidsProfile) {
+                            // Block arbitrary file drops in kids mode
                             return S_OK;
                         }
                         json j;
