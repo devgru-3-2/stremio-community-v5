@@ -233,7 +233,7 @@ void InitWebView2(HWND hWnd)
     }
 
     HRESULT hr = CreateCoreWebView2EnvironmentWithOptions(
-        browserExecutableFolder, nullptr, options.Get(),
+        browserExecutableFolder, g_userDataFolder.empty() ? nullptr : g_userDataFolder.c_str(), options.Get(),
         Microsoft::WRL::Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
         [hWnd](HRESULT res, ICoreWebView2Environment* env)->HRESULT
         {

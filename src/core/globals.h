@@ -46,6 +46,7 @@ extern std::vector<std::wstring> g_domainWhitelist;
 extern std::string  g_updateUrl;
 extern std::wstring  g_extensionsDetailsUrl;
 extern std::wstring  g_webuiUrl;
+extern std::wstring  g_userDataFolder; // WebView2 user data dir for current profile
 
 // Args
 extern bool g_streamingServer;

@@ -19,6 +19,7 @@
 #include "utils/config.h"
 #include "utils/crashlog.h"
 #include "utils/discord.h"
+#include "utils/profiles.h"
 #include "utils/helpers.h"
 #include "webview/webview.h"
 // This started as 1-week project so please don't take the code to seriously
@@ -147,6 +148,27 @@ int main(int argc, char *argv[]) {
   if (!InitMPV(g_hWnd)) {
     DestroyWindow(g_hWnd);
     return 1;
+  }
+
+  // profiles: load or create default, set user data folder
+  {
+    ProfilesDoc doc = LoadProfiles();
+    if (doc.profiles.empty()) {
+      ProfileMeta def;
+      def.id = "default";
+      def.name = "Default";
+      def.kids = false;
+      def.userDataDir = "profiles/default";
+      doc.profiles.push_back(def);
+      SaveProfiles(doc);
+      EnsureProfileDataDir(def.id);
+    } else {
+      EnsureProfileDataDir(doc.profiles.front().id);
+    }
+    // For MVP, pick first profile
+    const ProfileMeta &active = doc.profiles.front();
+    std::wstring base = GetExeDirectory();
+    g_userDataFolder = std::filesystem::path(base) / L"portable_config" / Utf8ToWstring(active.userDataDir);
   }
 
   // node
