@@ -293,6 +293,21 @@ Use these extra arguments when launching the application:
 
 > **⏳ Note:** By default will use as ``webui-url`` the [stremio-web-shell](https://github.com/Zaarrg/stremio-web-shell-fixes) web-ui hosted [here](https://zaarrg.github.io/stremio-web-shell-fixes/#/) which includes fixes to run smoothly as shell with qt6 and WebView2
 
+## 👤 Profiles & 🧒 Kids Mode (MVP)
+
+- Profiles are stored locally in ``portable_config/profiles.json`` and each profile uses an isolated WebView2 user data folder for its storage (localStorage/IndexedDB/cookies).
+- On first launch a default profile is created automatically. For now the first profile is used at startup.
+- Kids Mode, when enabled for a profile, applies native gates:
+  - Blocks opening ``magnet:`` links
+  - Blocks local file and ``.torrent`` opening
+  - Blocks external subtitle drops
+  - Injects a small UI tweak to hide obvious risky controls (e.g. "Parse Torrent", "Open File")
+- Optional PINs can be stored per-profile using a salted PBKDF2-HMAC-SHA256 hash.
+
+Notes:
+- You can still point the app to a custom web UI using ``--webui-url=...``.
+- Future versions may add a startup profile selector and UI for setting/changing PINs.
+
 ## 📚 **Guide / Docs**
 If you want to build this app yourself, check the “[docs](https://github.com/Zaarrg/stremio-desktop-v5/tree/master/docs)” folder in this repository for setup instructions and additional information.
 
