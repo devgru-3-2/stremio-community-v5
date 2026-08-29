@@ -504,6 +504,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 std::wstring extension = (dotPos != std::wstring::npos) ? receivedUrl.substr(dotPos) : L"";
 
                 if (extension == L".torrent") {
+                    // Block torrent files in kids mode
+                    if (g_isKidsProfile) return 0;
                     // Handle .torrent files
                     std::string utf8FilePath = WStringToUtf8(receivedUrl);
 
@@ -522,6 +524,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     j["data"] = fileBuffer;
                     SendToJS("OpenTorrent", j);
                 } else {
+                    // Block arbitrary local files in kids mode
+                    if (g_isKidsProfile) return 0;
                     // Handle other media files
                     std::string utf8FilePath = WStringToUtf8(receivedUrl);
                     json j;
@@ -543,6 +547,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 j["path"] = utf8Url;
                 SendToJS("AddonInstall", j);
             } else if (receivedUrl.rfind(L"magnet:", 0) == 0) {
+                // Block magnets in kids mode
+                if (g_isKidsProfile) return 0;
                 std::string utf8Url = WStringToUtf8(receivedUrl);
                 json j;
                 j["type"] = "OpenTorrent";

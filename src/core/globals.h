@@ -118,6 +118,7 @@ extern bool g_pauseOnMinimize;
 extern bool g_pauseOnLostFocus;
 extern bool g_allowZoom;
 extern bool g_isRpcOn;
+extern bool g_isKidsProfile; // true when the active profile is in kids mode
 
 // Tray sizes
 extern int g_tray_itemH;

@@ -170,6 +170,7 @@ int main(int argc, char *argv[]) {
     // MVP: pick the first profile
     const ProfileMeta &active = doc.profiles.front();
     EnsureProfileDataDir(active.id);
+    g_isKidsProfile = active.kids;
 
     std::wstring base = GetExeDirectory();
     g_userDataFolder = std::filesystem::path(base) / L"portable_config" /

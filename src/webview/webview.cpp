@@ -160,6 +160,32 @@ img.addEventListener('error', function() {
 })();
 )JS";
 
+// Minimal kids-mode UI safeguards: hide torrent/magnet/open-file entry points.
+static const wchar_t* INJECTED_KIDS_MODE_JS = LR"JS(
+(function(){
+  if (window.top !== window) return;
+  function hideRisk() {
+    try {
+      const riskyTexts = [
+        'Parse Torrent', 'Open Torrent', 'Magnet', 'Add Magnet', 'Open File', 'Local File'
+      ];
+      const nodes = document.querySelectorAll('a,button,[role="button"]');
+      nodes.forEach((el)=>{
+        const t = (el.textContent||'').trim().toLowerCase();
+        for (const k of riskyTexts) {
+          if (t.includes(k.toLowerCase())) { el.style.display='none'; break; }
+        }
+      });
+      document.querySelectorAll('input[type="file"]').forEach((el)=>{ el.style.display='none'; });
+    } catch(e) { /* noop */ }
+  }
+  hideRisk();
+  document.addEventListener('DOMContentLoaded', hideRisk, { once:false });
+  const mo = new MutationObserver(hideRisk);
+  mo.observe(document.documentElement||document.body, { subtree:true, childList:true });
+})();
+)JS";
+
 void WaitAndRefreshIfNeeded()
 {
     std::thread([](){
@@ -288,6 +314,9 @@ void InitWebView2(HWND hWnd)
 
                     g_webview->AddScriptToExecuteOnDocumentCreated(EXEC_SHELL_SCRIPT,nullptr);
                     g_webview->AddScriptToExecuteOnDocumentCreated(INJECTED_KEYDOWN_SCRIPT,nullptr);
+                    if (g_isKidsProfile) {
+                        g_webview->AddScriptToExecuteOnDocumentCreated(INJECTED_KIDS_MODE_JS,nullptr);
+                    }
 
                     SetupWebMods();
 
@@ -511,6 +540,8 @@ static void SetupWebMessageHandler()
                         std::string decodedFilePathUtf8 = decodeURIComponent(utf8FilePath);
                         std::string baseName = std::filesystem::path(decodedFilePathUtf8).filename().string();
                         if (isSubtitle(filePath)) {
+                            // Block external subtitle drops in kids mode
+                            if (g_isKidsProfile) return S_OK;
                             std::vector<std::string> subaddArgs = {"sub-add",decodedFilePathUtf8, "select", baseName + " External", "Other Tracks"};
                             HandleEvent("mpv-command", subaddArgs);
                             json j;
@@ -519,6 +550,8 @@ static void SetupWebMessageHandler()
                             SendToJS("SubtitleDropped", j);
                             return S_OK;
                         }
+                        // Block arbitrary file drops in kids mode
+                        if (g_isKidsProfile) return S_OK;
                         json j;
                         j["type"] = "FileDropped";
                         j["path"] = decodedFilePathUtf8;

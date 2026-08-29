@@ -73,6 +73,7 @@ bool g_pauseOnMinimize   = true;
 bool g_pauseOnLostFocus  = false;
 bool g_allowZoom         = false;
 bool g_isRpcOn = true;
+bool g_isKidsProfile = false;
 
 // Tray sizes
 int g_tray_itemH = 31;
