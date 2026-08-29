@@ -43,6 +43,8 @@ set(SOURCES
         src/utils/helpers.cpp
         src/utils/config.h
         src/utils/config.cpp
+        src/utils/profiles.h
+        src/utils/profiles.cpp
         src/utils/crashlog.h
         src/utils/crashlog.cpp
         src/mpv/player.h
