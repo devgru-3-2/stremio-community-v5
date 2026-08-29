@@ -6,6 +6,7 @@
 
 #include "../core/globals.h"
 #include "helpers.h"
+#include "pinlock.h"
 
 using json = nlohmann::json;
 
@@ -41,6 +42,9 @@ static ProfilesDoc ParseProfilesJson(const std::string &raw)
             if (p.contains("id") && p["id"].is_string())          m.id = p["id"].get<std::string>();
             if (p.contains("name") && p["name"].is_string())      m.name = p["name"].get<std::string>();
             if (p.contains("userDataDir") && p["userDataDir"].is_string()) m.userDataDir = p["userDataDir"].get<std::string>();
+            if (p.contains("kids") && p["kids"].is_boolean())     m.kids = p["kids"].get<bool>();
+            if (p.contains("passcodeHash") && p["passcodeHash"].is_string()) m.passcodeHash = p["passcodeHash"].get<std::string>();
+            if (p.contains("salt") && p["salt"].is_string())      m.salt = p["salt"].get<std::string>();
             if (!m.id.empty()) out.profiles.push_back(std::move(m));
         }
     } catch (...) {
@@ -57,6 +61,9 @@ static std::string SerializeProfilesJson(const ProfilesDoc &doc)
         p["id"]          = m.id;
         p["name"]        = m.name;
         p["userDataDir"] = m.userDataDir;
+        p["kids"]        = m.kids;
+        if (m.passcodeHash.has_value()) p["passcodeHash"] = *m.passcodeHash;
+        if (m.salt.has_value())         p["salt"]         = *m.salt;
         arr.push_back(std::move(p));
     }
     json j;
@@ -98,4 +105,23 @@ std::wstring EnsureProfileDataDir(const std::string &id)
     std::error_code ec;
     std::filesystem::create_directories(p, ec);
     return p.wstring();
+}
+
+void SetPin(ProfileMeta &meta, const std::string &pinUtf8)
+{
+    if (pinUtf8.empty()) {
+        meta.passcodeHash.reset();
+        meta.salt.reset();
+        return;
+    }
+    std::string salt = GenerateSaltHex();
+    meta.salt         = salt;
+    meta.passcodeHash = DerivePBKDF2_SHA256(pinUtf8, salt);
+}
+
+bool VerifyPin(const ProfileMeta &meta, const std::string &pinUtf8)
+{
+    if (!meta.passcodeHash.has_value() || !meta.salt.has_value()) return false;
+    std::string derived = DerivePBKDF2_SHA256(pinUtf8, *meta.salt);
+    return !derived.empty() && derived == *meta.passcodeHash;
 }
