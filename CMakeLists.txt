@@ -45,6 +45,8 @@ set(SOURCES
         src/utils/config.cpp
         src/utils/profiles.h
         src/utils/profiles.cpp
+        src/utils/pinlock.h
+        src/utils/pinlock.cpp
         src/utils/crashlog.h
         src/utils/crashlog.cpp
         src/mpv/player.h
