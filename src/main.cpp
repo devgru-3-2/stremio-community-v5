@@ -19,6 +19,7 @@
 #include "utils/config.h"
 #include "utils/crashlog.h"
 #include "utils/discord.h"
+#include "utils/profiles.h"
 #include "utils/helpers.h"
 #include "webview/webview.h"
 // This started as 1-week project so please don't take the code to seriously
@@ -152,6 +153,27 @@ int main(int argc, char *argv[]) {
   // node
   if (g_streamingServer) {
     StartNodeServer();
+  }
+
+  // profiles: load or create the default profile, then select the active one
+  {
+    ProfilesDoc doc = LoadProfiles();
+    if (doc.profiles.empty()) {
+      ProfileMeta def;
+      def.id          = "default";
+      def.name        = "Default";
+      def.userDataDir = "profiles/default";
+      doc.profiles.push_back(def);
+      SaveProfiles(doc);
+    }
+
+    // MVP: pick the first profile
+    const ProfileMeta &active = doc.profiles.front();
+    EnsureProfileDataDir(active.id);
+
+    std::wstring base = GetExeDirectory();
+    g_userDataFolder = std::filesystem::path(base) / L"portable_config" /
+                       Utf8ToWstring(active.userDataDir);
   }
 
   // webview
